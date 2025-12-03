@@ -18,22 +18,48 @@ class CreateHargaBekal extends CreateRecord
         return $this->getResource()::getUrl('index');
     }
 
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Convert tanggal_update to date only (remove time)
+        if (isset($data['tanggal_update'])) {
+            $data['tanggal_update'] = \Carbon\Carbon::parse($data['tanggal_update'])->format('Y-m-d');
+        }
+        
+        return $data;
+    }
+
     protected function beforeCreate(): void
     {
         // Get input values
         $kotaId = $this->data['kota_id'] ?? null;
         $bekalId = $this->data['bekal_id'] ?? null;
+        $tanggalUpdate = $this->data['tanggal_update'] ?? null;
 
-        // Check if the same record exists
+        // Validasi input tidak boleh null
+        if (!$kotaId || !$bekalId || !$tanggalUpdate) {
+            Notification::make()
+                ->title('Error!')
+                ->body('Kota, Bekal, dan Tanggal Update harus diisi')
+                ->danger()
+                ->send();
+            $this->halt();
+        }
+
+        // Convert to date only for comparison
+        $tanggalUpdateDate = \Carbon\Carbon::parse($tanggalUpdate)->format('Y-m-d');
+
+        // Check if the same record exists (Kota + Bekal + Tanggal Update)
         $exists = HargaBekal::where('kota_id', $kotaId)
             ->where('bekal_id', $bekalId)
+            ->whereDate('tanggal_update', $tanggalUpdateDate)
+            ->whereNull('deleted_at')
             ->exists();
 
         if ($exists) {
             // Show Filament error notification
             Notification::make()
                 ->title('Error!')
-                ->body('Harga bekal untuk kota dan bekal yang sama sudah ada')
+                ->body('Harga BBM untuk kombinasi Kota, Bekal, dan Tanggal Update yang sama sudah ada')
                 ->danger()
                 ->send();
 
@@ -47,7 +73,7 @@ class CreateHargaBekal extends CreateRecord
         return Notification::make()
             ->success()
             ->title('Berhasil')
-            ->body('Data harga bekal berhasil ditambahkan.');
+            ->body('Data Harga BBM berhasil ditambahkan.');
     }
 
     public function getFormActions(): array
@@ -64,6 +90,6 @@ class CreateHargaBekal extends CreateRecord
 
     public function getTitle(): string
     {
-        return 'Buat Harga Bekal';
+        return 'Buat Harga BBM';
     }
 }

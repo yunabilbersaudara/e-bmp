@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PaguResource\Pages;
 use App\Filament\Resources\PaguResource\RelationManagers;
 use App\Models\Pagu;
+use App\Traits\RoleBasedResourceAccess;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -18,26 +19,27 @@ use Filament\Support\RawJs;
 
 class PaguResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = Pagu::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
 
     protected static ?string $navigationGroup = 'Transaksi';
 
-    protected static ?string $navigationLabel = 'Pagu';
+    protected static ?string $navigationLabel = 'Pagu Anggaran';
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $slug = 'pagu';
+    protected static ?string $slug = 'pagu-anggaran';
 
     public static function getModelLabel(): string
     {
-        return 'Pagu'; // Singular name
+        return 'Pagu Anggaran'; // Singular name
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Daftar Pagu';
+        return 'Daftar Pagu Anggaran';
     }
 
     public static function form(Form $form): Form
@@ -46,7 +48,7 @@ class PaguResource extends Resource
             ->schema([
                 Forms\Components\Select::make('golongan_bbm_id')
                     ->relationship(name: 'golonganBbm', titleAttribute: 'golongan')
-                    ->label('Golongan')
+                    ->label('Jenis Alut')
                     ->searchable()
                     ->preload()
                     ->required(),
@@ -60,6 +62,8 @@ class PaguResource extends Resource
                     ])
                     ->formatStateUsing(fn ($state) => $state ? number_format($state, 0, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state) => (int) str_replace(['.', ',', ' '], '', $state))
+                    ->minValue(1)
+                    ->rules(['min:1'])
                     ->live(),
                 Forms\Components\TextInput::make('tahun_anggaran')
                     ->required()
@@ -87,7 +91,7 @@ class PaguResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('golonganBbm.golongan')
                     ->numeric()
-                    ->label('Golongan')
+                    ->label('Jenis Alut')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('nilai_pagu')
                     ->numeric()
@@ -120,7 +124,7 @@ class PaguResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('golongan_bbm_id')
-                    ->label('Golongan')
+                    ->label('Jenis Alut')
                     ->relationship('golonganBbm', 'golongan') // Relasi ke Golongan BBM
                     ->preload(),
                 SelectFilter::make('tahun_anggaran')

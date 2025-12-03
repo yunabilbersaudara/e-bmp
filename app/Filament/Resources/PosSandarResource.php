@@ -12,9 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\RoleBasedResourceAccess;
 
 class PosSandarResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = PosSandar::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
@@ -23,7 +25,7 @@ class PosSandarResource extends Resource
 
     protected static ?string $navigationLabel = 'Pos Sandar';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8; // 8. Pos Sandar
 
     protected static ?string $slug = 'pos_sandar';
 

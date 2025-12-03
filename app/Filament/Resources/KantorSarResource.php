@@ -12,9 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Traits\RoleBasedResourceAccess;
 
 class KantorSarResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = KantorSar::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
@@ -23,7 +25,7 @@ class KantorSarResource extends Resource
 
     protected static ?string $navigationLabel = 'Kantor SAR';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6; // 6. Kantor SAR
 
     protected static ?string $slug = 'kantor-sar';
 
@@ -45,6 +47,13 @@ class KantorSarResource extends Resource
                     ->label('Kantor SAR')
                     ->required()
                     ->maxLength(50),
+                
+                Forms\Components\Select::make('kota_id')
+                    ->label('Kota')
+                    ->relationship('kota', 'kota')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
             ]);
     }
 
@@ -55,6 +64,12 @@ class KantorSarResource extends Resource
                 Tables\Columns\TextColumn::make('kantor_sar')
                     ->label('Kantor SAR')
                     ->searchable(),
+                
+                Tables\Columns\TextColumn::make('kota.kota')
+                    ->label('Kota')
+                    ->sortable()
+                    ->searchable(),
+                
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->label('Dihapus Pada')
                     ->dateTime()

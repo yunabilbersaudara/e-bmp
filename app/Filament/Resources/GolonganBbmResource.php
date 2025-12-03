@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\GolonganBbmResource\Pages;
 use App\Filament\Resources\GolonganBbmResource\RelationManagers;
 use App\Models\GolonganBbm;
+use App\Traits\RoleBasedResourceAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,26 +16,27 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GolonganBbmResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = GolonganBbm::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
     protected static ?string $navigationGroup = 'Master';
 
-    protected static ?string $navigationLabel = 'Golongan BBM';
+    protected static ?string $navigationLabel = 'Jenis Alut';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 1; // 1. Jenis Alut
 
-    protected static ?string $slug = 'golongan-bbm';
+    protected static ?string $slug = 'jenis-alut';
 
     public static function getModelLabel(): string
     {
-        return 'Golongan BBM'; // Singular name
+        return 'Jenis Alut'; // Singular name
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Daftar Golongan BBM';
+        return 'Daftar Jenis Alut';
     }
 
     public static function form(Form $form): Form
@@ -42,7 +44,7 @@ class GolonganBbmResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('golongan')
-                    ->label('Golongan BBM')
+                    ->label('Jenis Alut')
                     ->required()
                     ->maxLength(50),
             ]);
@@ -53,7 +55,7 @@ class GolonganBbmResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('golongan')
-                    ->label('Golongan BBM')
+                    ->label('Jenis Alut')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->label('Dihapus Pada')
