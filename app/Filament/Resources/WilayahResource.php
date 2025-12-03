@@ -11,9 +11,11 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\RoleBasedResourceAccess;
 
 class WilayahResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = Wilayah::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map';
@@ -22,7 +24,7 @@ class WilayahResource extends Resource
 
     protected static ?string $navigationLabel = 'Wilayah';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4; // 4. Wilayah
 
     protected static ?string $slug = 'wilayah';
 
@@ -43,18 +45,12 @@ class WilayahResource extends Resource
                 Forms\Components\TextInput::make('wilayah_ke')
                     ->label('Wilayah Ke')
                     ->required()
-                    ->minLength(1)
-                    ->maxLength(3)
-                    ->inputMode('numeric')  // Change to numeric for better UX
-                    ->rule('integer')
-                    ->rule('between:1,999')
                     ->extraInputAttributes([
-                        'onkeypress' => 'return event.charCode >= 48 && event.charCode <= 57', // Only allow numbers 0-9
-                        'onkeyup' => 'this.value = this.value.replace(/[^0-9]/g, "")', // Remove non-numeric characters on keyup
-                        'onpaste' => 'return false', // Prevent paste
-                        'autocomplete' => 'off',
-                        'type' => 'text'  // Explicitly set to text type
-                    ]),
+                        'type' => 'text',
+                        'maxlength' => '1',
+                        'oninput' => 'this.value = this.value.replace(/[^1-9]/g, "")',
+                    ])
+                    ->rules(['required', 'regex:/^[1-9]$/']),
             ]);
     }
 

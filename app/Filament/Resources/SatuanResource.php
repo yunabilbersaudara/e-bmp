@@ -12,9 +12,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Traits\RoleBasedResourceAccess;
 
 class SatuanResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = Satuan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
@@ -23,7 +25,7 @@ class SatuanResource extends Resource
 
     protected static ?string $navigationLabel = 'Satuan';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 2; // 2. Satuan
 
     protected static ?string $slug = 'satuan';
 

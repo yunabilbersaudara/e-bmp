@@ -9,10 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use App\Traits\PreventUpdateTimestamp;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, PreventUpdateTimestamp;
 
     protected $table = 'ms_user';
     protected $primaryKey = 'user_id';
@@ -28,7 +29,9 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'user_id',
         'kantor_sar_id',
+        'alpal_id',
         'name',
+        'username',
         'email',
         'password',
         'remember_token',
@@ -59,17 +62,24 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
+    public function getAuthIdentifierName()
+    {
+        return 'username'; // atau 'email' jika masih ingin support keduanya
+    }
+
     public function kantorSar()
     {
         return $this->belongsTo(KantorSar::class, 'kantor_sar_id', 'kantor_sar_id');
     }
 
+    public function alpal()
+    {
+        return $this->belongsTo(Alpal::class, 'alpal_id', 'alpal_id');
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        // For debugging, allow all users to access the admin panel
-        return true;
-        
-        // Original implementation:
-        // return str_ends_with($this->email, '@gmail.com') && $this->hasVerifiedEmail();
+        // All authenticated users with valid roles can access the panel
+        return $this->level !== null;
     }
 }

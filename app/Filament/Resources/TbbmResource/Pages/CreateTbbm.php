@@ -20,7 +20,7 @@ class CreateTbbm extends CreateRecord
         $data['plant'] = $data['plant'];
         $data['depot'] = ucwords($data['depot']);
         $data['pbbkb'] = $data['pbbkb'];
-        $data['ship_to'] = $data['ship_to'];
+        // $data['ship_to'] = $data['ship_to'];
 
         return $data;
     }
@@ -82,5 +82,10 @@ class CreateTbbm extends CreateRecord
             $this->getCancelFormAction()
                 ->label('Batal'),
         ];
+    }
+    
+    public function getTitle(): string
+    {
+        return 'Buat TBBM/DDPU';
     }
 }

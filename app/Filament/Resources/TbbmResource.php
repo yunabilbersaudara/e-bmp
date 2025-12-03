@@ -13,9 +13,11 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Traits\RoleBasedResourceAccess;
 
 class TbbmResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = Tbbm::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-queue-list';
@@ -24,7 +26,7 @@ class TbbmResource extends Resource
 
     protected static ?string $navigationLabel = 'TBBM/DDPU';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 7; // 7. TBBM/DPPU
 
     protected static ?string $slug = 'tbbm';
 
@@ -42,25 +44,41 @@ class TbbmResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('plant')
+                    ->label('Plant')
+                    ->required()
+                    ->maxLength(5),
+                Forms\Components\TextInput::make('depot')
+                    ->label('Depot')
+                    ->required()
+                    ->maxLength(50),
                 Forms\Components\Select::make('kota_id')
+                    ->label('Kota')
                     ->relationship(name: 'kota', titleAttribute: 'kota')
                     ->searchable()
                     ->preload()
                     ->required(),
-                Forms\Components\TextInput::make('plant')
-                    ->required()
-                    ->maxLength(5),
-                Forms\Components\TextInput::make('depot')
-                    ->required()
-                    ->maxLength(50),
                 Forms\Components\TextInput::make('pbbkb')
+                    ->label('PBBKB (%)')
                     ->required()
-                    ->numeric()
-                    ->minValue(0),
-                Forms\Components\TextInput::make('ship_to')
-                    ->required()
-                    ->mask('999999')
-                    ->maxLength(6),
+                    ->maxLength(6)
+                    ->suffix('%')
+                    ->extraInputAttributes([
+                        'type' => 'text',
+                        'maxlength' => '6',
+                        'oninput' => 'this.value = this.value.replace(/[^0-9,]/g, "").replace(/(,.*),/g, "$1")',
+                    ])
+                    ->formatStateUsing(function ($state) {
+                        if ($state === null) return null;
+                        // Format dengan koma sebagai pemisah desimal (format Indonesia)
+                        $formatted = rtrim(rtrim(number_format($state, 2, ',', ''), '0'), ',');
+                        return $formatted;
+                    })
+                    ->dehydrateStateUsing(function ($state) {
+                        // Convert koma ke titik untuk database
+                        return (float) str_replace(',', '.', $state);
+                    })
+                    ->rules(['regex:/^[0-9]+([,][0-9]{1,2})?$/', 'min:0', 'max:999']),
             ]);
     }
 
@@ -68,19 +86,27 @@ class TbbmResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('plant')
+                    ->label('Plant')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('depot')
+                    ->label('Depot')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('kota.kota')
                     ->label('Kota')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('plant')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('depot')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('pbbkb')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('ship_to')
-                    ->searchable(),
+                    ->label('PBBKB (%)')
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        if ($state === null) return null;
+                        // Format dengan koma sebagai pemisah desimal (format Indonesia)
+                        $formatted = rtrim(rtrim(number_format($state, 2, ',', ''), '0'), ',');
+                        return $formatted . '%';
+                    }),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\HargaBekalResource\Pages;
 use App\Filament\Resources\HargaBekalResource\RelationManagers;
 use App\Models\HargaBekal;
+use App\Traits\RoleBasedResourceAccess;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,26 +16,22 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HargaBekalResource extends Resource
 {
+    use RoleBasedResourceAccess;
     protected static ?string $model = HargaBekal::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?string $navigationGroup = 'Master';
-    protected static ?string $navigationLabel = 'Harga Bekal';
+    protected static ?string $navigationLabel = 'Harga BBM';
     protected static ?int $navigationSort = 8; // Place at the end of Master menu
     
     public static function getModelLabel(): string
     {
-        return 'Harga Bekal'; // Singular name
+        return 'Harga BBM'; // Singular name
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'Daftar Harga Bekal'; // Plural name
-    }
-    
-    public static function canAccess(): bool
-    {
-        return true;
+        return 'Daftar Harga BBM'; // Plural name
     }
 
     public static function form(Form $form): Form
@@ -65,7 +62,17 @@ class HargaBekalResource extends Resource
                     ])
                     ->formatStateUsing(fn ($state) => $state ? number_format($state, 0, ',', '.') : null)
                     ->dehydrateStateUsing(fn ($state) => (int) str_replace(['.', ',', ' '], '', $state))
+                    ->minValue(1)
+                    ->rules(['min:1'])
                     ->live(),
+                    
+                Forms\Components\DatePicker::make('tanggal_update')
+                    ->label('Tanggal Update')
+                    ->required()
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->closeOnDateSelection(true)
+                    ->default(now()),
             ]);
     }
 
@@ -87,6 +94,11 @@ class HargaBekalResource extends Resource
                     ->label('Harga')
                     ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->alignment('right')
+                    ->sortable(),
+                    
+                Tables\Columns\TextColumn::make('tanggal_update')
+                    ->label('Tanggal Update')
+                    ->date('d/m/Y')
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('created_at')
